@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Welcome to Drinkable!</h1>
+  <p>Enter a location to see the water quality in your area.</p>
+  <form method="post" action="{% url 'water_quality' %}">
+    {% csrf_token %}
+    <input type="text" name="location" placeholder="Location">
+    <button type="submit">Search</button>
+  </form>
+{% endblock %}
