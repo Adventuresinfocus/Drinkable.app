@@ -1,11 +1,31 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Welcome to Drinkable!</h1>
-  <p>Enter a location to see the water quality in your area.</p>
-  <form method="post" action="{% url 'water_quality' %}">
-    {% csrf_token %}
-    <input type="text" name="location" placeholder="Location">
-    <button type="submit">Search</button>
-  </form>
+    <div id="map"></div>
+    <script>
+        // Initialize map with user's location
+        var map = L.map('map').setView([{{ location.latitude }}, {{ location.longitude }}], 13);
+        
+        // Add tile layer
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'your.mapbox.access.token'
+        }).addTo(map);
+
+        // Add markers for water data locations with alerts
+        {% for data in water_data %}
+            {% if data.alert %}
+                L.marker([{{ data.latitude }}, {{ data.longitude }}]).addTo(map).bindPopup("{{ data.name }}<br>{{ data.quality }}");
+                L.marker([{{ data.latitude }}, {{ data.longitude }}], {icon: yellowIcon}).addTo(map).bindPopup("{{ data.name }}<br>{{ data.alert }}");
+            {% else %}
+                L.marker([{{ data.latitude }}, {{ data.longitude }}]).addTo(map).bindPopup("{{ data.name }}<br>{{ data.quality }}");
+            {% endif %}
+        {% endfor %}
+    </script>
 {% endblock %}
